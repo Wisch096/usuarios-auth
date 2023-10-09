@@ -1,10 +1,12 @@
 ﻿using System;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using UsuariosApi.Authorization;
 using UsuariosApi.Data;
 using UsuariosApi.Models;
 using UsuariosApi.Services;
@@ -14,9 +16,7 @@ internal class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
+        
         var connString = builder.Configuration.GetConnectionString("UsuarioConnection");
 
         builder.Services.AddDbContext<UsuarioDbContext>
@@ -25,6 +25,13 @@ internal class Program
             opts.UseMySql(connString, ServerVersion.AutoDetect(connString));
         });
 
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("IdadeMinima", policy => policy.AddRequirements(new IdadeMinima(18)));
+        });
+
+        builder.Services.AddSingleton<IAuthorizationHandler, IdadeAuthorization>();
+        
         builder.Services
             .AddIdentity<Usuario, IdentityRole>()
             .AddEntityFrameworkStores<UsuarioDbContext>()
@@ -33,16 +40,15 @@ internal class Program
         builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
         builder.Services.AddScoped<UsuarioService>();
-
+        builder.Services.AddScoped<TokenService>();
+        
         builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
 
         var app = builder.Build();
-
-// Configure the HTTP request pipeline.
+        
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();

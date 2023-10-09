@@ -1,6 +1,14 @@
-﻿namespace UsuariosApi.Controllers;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-public class AcessoController
+namespace UsuariosApi.Controllers;
+
+public class AcessoController : ControllerBase
 {
-    
+    [HttpGet]
+    [Authorize(Policy = "IdadeMinima")]
+    public IActionResult Get()
+    {
+        return Ok("Acesso permitido!");
+    }
 }

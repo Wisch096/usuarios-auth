@@ -1,6 +1,13 @@
-﻿namespace UsuariosApi.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 
-public class IdadeMinima
+namespace UsuariosApi.Authorization;
+
+public class IdadeMinima : IAuthorizationRequirement 
 {
+    public IdadeMinima(int idade)
+    {
+        idade = idade;
+    }
     
+    public int Idade { get; set; }
 }
