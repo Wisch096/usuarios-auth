@@ -5,15 +5,19 @@ using UsuariosApi.Models;
 
 namespace UsuariosApi.Services
 {
-    public class CadastroService
+    public class UsuarioService
     {
         private IMapper _mapper;
         private UserManager<Usuario> _userManager;
+        private SignInManager<Usuario> _signInManager;
+        private TokenService _tokenService;
 
-        public CadastroService(UserManager<Usuario> userManager, IMapper mapper)
+        public UsuarioService(UserManager<Usuario> userManager, IMapper mapper, SignInManager<Usuario> signInManager, TokenService tokenService)
         {
             _userManager = userManager;
             _mapper = mapper;
+            _signInManager = signInManager;
+            _tokenService = tokenService;
         }
 
         public async Task CadastraUsuario(CreateUsuarioDto dto)
@@ -27,6 +31,17 @@ namespace UsuariosApi.Services
                 throw new ApplicationException("Falha ao cadastrar usuário!");
             }
             
+        }
+
+        public async Task Login(LoginUsuarioDto dto)
+        {
+           var resultado = await _signInManager.PasswordSignInAsync(dto.Username, dto.Password, false, false);
+           if (!resultado.Succeeded)
+           {
+               throw new ApplicationException("Usuário não atenticado!");
+           }
+
+           _tokenService.GenerateToken();
         }
     }
 }
