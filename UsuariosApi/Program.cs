@@ -1,12 +1,9 @@
-﻿using System;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using UsuariosApi.Authorization;
 using UsuariosApi.Data;
 using UsuariosApi.Models;
@@ -34,6 +31,10 @@ internal class Program
             options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0nxs9wsjne09hs90dhsd90hnsd")),
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ClockSkew = TimeSpan.Zero
             };
         });
 
@@ -69,6 +70,8 @@ internal class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
+        
         app.UseAuthorization();
 
         app.MapControllers();
